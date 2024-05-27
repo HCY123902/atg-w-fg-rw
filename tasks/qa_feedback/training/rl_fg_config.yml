@@ -1,0 +1,82 @@
+model:
+  policy_model:
+    ckpt: meta-llama/Llama-2-7b-hf
+    peft_ckpt: tasks/qa_feedback/model_outputs/distillation
+    input_padding_side: right
+    train_generation_kwargs:
+      do_sample: True
+      top_k: 20
+      top_p: null
+      temperature: 0.7
+    eval_generation_kwargs:
+      do_sample: False
+      num_beams: 1
+  value_model:
+    ckpt: meta-llama/Llama-2-7b-hf
+    freeze_value_model: False
+    policy_value_sharing: False
+  type: llama
+  
+
+reward:
+  citation_model:
+    recall_positive_reward: 0.2
+    recall_negative_reward: -0.2
+    precision_positive_reward: 0.2
+    precision_negative_reward: -0.2
+    at_most_citations: 3
+    exclude_citation_recall: False
+    exclude_citation_precision: False
+  correctness_model:
+    positive_reward: 0.2
+    negative_reward: -0.2
+    exclude_correctness_recall: False
+  fluency_model:
+    mean: 0.29007946106116445
+    std: 0.12582918544090416
+    bias: 0.0
+    scale: 0.125
+  nli_model:
+    ckpt: osunlp/attrscore-flan-t5-xl
+  holistic: False
+
+env:
+  max_input_len: 1200
+  max_generated_len: 200
+  train_num_samples_per_input: 4
+
+ppo:
+  kl_coef: 0.3
+  lam: 0.95
+  gamma: 1.0
+  pg_coef: 1.0
+  vf_coef: 1.0
+  cliprange: 0.2
+  cliprange_value: 0.2
+  whiten_rewards: True
+
+train:
+  total_episodes: 48000
+  eval_interval: 200
+  sampling_batch_size_per_card: 2
+  training_batch_size_per_card: 1
+  lr: 0.00003
+  n_warmup_steps: 100
+  n_ppo_epoch_per_rollout: 1
+  kl_threshold: 100.0
+  clip_grad: False
+  max_grad_norm: 0.5
+  seed: 42
+  cuda_deterministic: True
+
+logging:
+  run_name: run_2
+  wandb_log: True
+  wandb_entity: 2320032466hchy
+  wandb_project: RLHF
+  log_interval: 1
+  save_dir: tasks/qa_feedback/model_outputs/rl-fg
+  save_corr_rec: True
+
+dataset:
+  name: combined
